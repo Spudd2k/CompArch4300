@@ -44,14 +44,12 @@ module EXECUTE(
     wire [2:0]  control;
     wire        aluzero;
 
-    // 1) branch target address adder: NPC + sign-extended imm
     adder adder3(
         .add_in1(npcout),
         .add_in2(s_extendout),
         .add_out(adder_out)
     );
 
-    // 2) bottom mux chooses write register (rt vs rd)
     bottom_mux bottom_mux3(
         .a(instrout_1511),   // rd
         .b(instrout_2016),   // rt
@@ -59,14 +57,12 @@ module EXECUTE(
         .y(muxout)
     );
 
-    // 3) ALU control: **funct comes from Instr[5:0], not from s_extendout**
     alu_control alu_control3(
         .funct(funct),
         .aluop(aluop),
         .select(control)
     );
 
-    // 4) top mux: choose between register rt and immediate
     top_mux top_mux3(
         .a(rdata2),        // register value
         .b(s_extendout),   // immediate
@@ -74,7 +70,6 @@ module EXECUTE(
         .y(b)
     );
 
-    // 5) ALU
     alu alu3(
         .a(rdata1),
         .b(b),
@@ -83,7 +78,6 @@ module EXECUTE(
         .zero(aluzero)
     );
 
-    // 6) EX/MEM latch
     ex_mem ex_mem3(
         .clk(clk),
         .ctlwb_out(wb_ctl),
