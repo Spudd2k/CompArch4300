@@ -10,7 +10,7 @@ module idExLatch(
     input  wire [31:0] sign_ext,
     input  wire [4:0]  instr_bits_20_16,
     input  wire [4:0]  instr_bits_15_11,
-    input  wire [5:0]  instr_funct,          //Instr[5:0] from decode
+    input  wire [5:0]  instr_funct,          
 
     output reg  [1:0]  wb_out,
     output reg  [2:0]  mem_out,
@@ -21,7 +21,7 @@ module idExLatch(
     output reg  [31:0] sign_ext_out,
     output reg  [4:0]  instr_bits_20_16_out,
     output reg  [4:0]  instr_bits_15_11_out,
-    output reg  [5:0]  instr_funct_out       // <<< NEW: latched funct bits
+    output reg  [5:0]  instr_funct_out       
 );
     always @(posedge clk or posedge rst) begin
         if (rst) begin

@@ -1,28 +1,16 @@
 `timescale 1ns / 1ps
 
-// ================================================================
-//                    MIPS 5-STAGE PIPELINE
-//
-// IFETCH -> IF/ID -> DECODE -> ID/EX -> EXECUTE -> EX/MEM -> MEMORY
-// -> MEM/WB -> WRITEBACK -> back to DECODE (register file)
-//
-// This file wires ALL stages together using YOUR module ports.
-// ================================================================
-
 module PIPELINE(
     input wire clk,
     input wire rst
 );
 
-    // ============================================================
+  
     // IF/ID wires
-    // ============================================================
     wire [31:0] if_id_instr;
     wire [31:0] if_id_npc;
 
-    // ============================================================
     // ID/EX wires
-    // ============================================================
     wire [1:0]  id_ex_wb;
     wire [2:0]  id_ex_mem;
     wire [3:0]  id_ex_execute;
@@ -35,9 +23,9 @@ module PIPELINE(
     wire [4:0]  id_ex_instr_bits_20_16;
     wire [4:0]  id_ex_instr_bits_15_11;
 
-    // ============================================================
+    wire [5:0] id_ex_instr_funct;
+
     // EXECUTE (EX/MEM outputs)
-    // ============================================================
     wire [1:0]  ex_mem_wb_ctl;
     wire        ex_mem_branch;
     wire        ex_mem_memread;
@@ -49,27 +37,21 @@ module PIPELINE(
     wire [31:0] ex_mem_rdata2out;
     wire [4:0]  ex_mem_five_bit_muxout;
 
-    // ============================================================
     // MEMORY (MEM/WB outputs)
-    // ============================================================
     wire        PCSrc;
     wire [31:0] branch_addr;
 
-    wire [1:0]  mem_control_wb;     // {RegWrite, MemtoReg}
+    wire [1:0]  mem_control_wb;     
     wire [31:0] mem_Read_data;
     wire [31:0] mem_ALU_result;
     wire [4:0]  mem_Write_reg;
 
-    // ============================================================
     // WRITEBACK (WB outputs)
-    // ============================================================
     wire [31:0] wb_data;
     wire        wb_reg_write;
     wire [4:0]  wb_write_reg;
 
-    // ============================================================
     // IFETCH STAGE
-    // ============================================================
     fetch u_fetch(
         .clk(clk),
         .rst(rst),
@@ -79,9 +61,7 @@ module PIPELINE(
         .if_id_npc(if_id_npc)
     );
 
-    // ============================================================
     // DECODE STAGE
-    // ============================================================
     decode u_decode(
         .clk(clk),
         .rst(rst),
@@ -104,14 +84,13 @@ module PIPELINE(
         .id_ex_readdat2(id_ex_readdat2),
         .id_ex_sign_ext(id_ex_sign_ext),
         .id_ex_instr_bits_20_16(id_ex_instr_bits_20_16),
-        .id_ex_instr_bits_15_11(id_ex_instr_bits_15_11)
+        .id_ex_instr_bits_15_11(id_ex_instr_bits_15_11),
+        .id_ex_instr_funct     (id_ex_instr_funct)
     );
 
-    // ============================================================
     // EXECUTE STAGE
-    // ============================================================
 
-    // Decode EX control bundle
+    // Decode EX control 
     wire ex_regdst = id_ex_execute[3];
     wire ex_alusrc = id_ex_execute[0];
     wire [1:0] ex_aluop = id_ex_execute[2:1];
@@ -134,9 +113,7 @@ module PIPELINE(
         .instrout_2016(id_ex_instr_bits_20_16),
         .instrout_1511(id_ex_instr_bits_15_11),
 
-        // IMPORTANT: decode does NOT currently output funct.
-        // Set to 0 for now unless you add that port.
-        .funct(6'b000000),
+        .funct(id_ex_instr_funct),
 
         // OUTPUTS TO MEM
         .wb_ctlout(ex_mem_wb_ctl),
@@ -150,11 +127,10 @@ module PIPELINE(
         .five_bit_muxout(ex_mem_five_bit_muxout)
     );
 
-    // ============================================================
     // MEMORY STAGE
-    // ============================================================
     MEMORY u_memory(
         .clk(clk),
+        .rst(rst),
 
         // FROM EXECUTE
         .wb_ctlout(ex_mem_wb_ctl),
@@ -178,9 +154,7 @@ module PIPELINE(
         .mem_Write_reg(mem_Write_reg)
     );
 
-    // ============================================================
     // WRITEBACK STAGE
-    // ============================================================
     WRITEBACK u_wb(
         .MemtoReg(mem_control_wb[0]),
         .RegWrite_in(mem_control_wb[1]),

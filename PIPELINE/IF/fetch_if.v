@@ -39,10 +39,14 @@ module instrMem #(
   input  wire [31:0] addr,
   output wire [31:0] data
 );
+
   reg [31:0] mem [0:255];
 
+integer i;
 initial begin
-    $readmemh("instr.mem", mem);
+    $readmemb("instr.mem", mem);
+    for (i = 0; i < 24; i = i + 1)
+    $display(mem[i]);
 end
 
 

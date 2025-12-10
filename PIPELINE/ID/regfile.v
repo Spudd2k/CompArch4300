@@ -11,26 +11,18 @@ module regfile(
     reg [31:0] regs [31:0];
     integer i;
 
-    // Preload the register file like instruction memory
     initial begin
         for (i = 0; i < 32; i = i + 1)
             regs[i] = 32'b0;
-
-        // Give some registers meaningful values
-        regs[0] = 32'b0;           // $zero
-        regs[1] = 32'h11121951;
-        regs[2] = 32'h23938222;    // RT will read this
-        regs[3] = 32'h19396328;
-        regs[4] = 32'h28418204;
-        // add more if you want
     end
 
+    // CHANGE: write on posedge clk (standard)
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            // optional: either clear here OR leave contents as initialized
-            // for a "ROM-like" regfile, you might *not* clear on reset:
-            // do nothing on reset
-        end else if (regwrite && rd != 0) begin
+           // for (i = 0; i < 32; i = i + 1)
+           //     regs[i] <= 32'b0;
+        end
+        else if (regwrite && rd != 0) begin
             regs[rd] <= writedata;
         end
     end

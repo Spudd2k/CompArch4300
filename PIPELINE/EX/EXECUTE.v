@@ -1,9 +1,4 @@
 `timescale 1ns / 1ps
-/*
-Execute Stage: Uses the outputs of the ID/EX latch and
-instantiates: adder, bottom_mux (5-bit), alu_control, alu,
-top_mux (32-bit), and ex_mem.
-*/
 
 module EXECUTE(
     input  wire        clk,          // <- clock for EX/MEM latch
@@ -47,17 +42,17 @@ module EXECUTE(
     // 1) branch target address adder: NPC + sign-extended imm
     adder adder3(
         .add_in1(npcout),
-        .add_in2(s_extendout),
+        .add_in2(s_extendout), //s_extendout[29:0], 2'b00}
         .add_out(adder_out)
     );
 
     // 2) bottom mux chooses write register (rt vs rd)
     bottom_mux bottom_mux3(
-        .a(instrout_1511),   // rd
-        .b(instrout_2016),   // rt
-        .sel(regdst),
-        .y(muxout)
-    );
+    .a(instrout_1511),   // rd  → input a
+    .b(instrout_2016),   // rt  → input b
+    .sel(regdst),        // RegDst = 1 → select a (rd)
+    .y(muxout)
+);
 
     // 3) ALU control: **funct comes from Instr[5:0], not from s_extendout**
     alu_control alu_control3(

@@ -14,7 +14,8 @@ module decode(
                         id_ex_readdat2,
                         id_ex_sign_ext,
     output wire [4:0]   id_ex_instr_bits_20_16,
-                        id_ex_instr_bits_15_11
+                        id_ex_instr_bits_15_11,
+    output wire [5:0]   id_ex_instr_funct
 );
 
     // internal
@@ -25,7 +26,10 @@ module decode(
     wire [2:0]  mem_internal;
     wire [3:0]  ex_internal;
 
-    // Sign extend immediate [15:0] -> 32 bits
+    //debug regs
+    //wire [31:0] dbg_r0, dbg_r1, dbg_r2, dbg_r3, dbg_r8, dbg_r9, dbg_r10;
+
+    // Sign extend immediate [15:0] 
     signExt sE0(
         .immediate(if_id_instr[15:0]),
         .extended(sign_ext_internal)
@@ -42,6 +46,14 @@ module decode(
         .writedata(mem_wb_write_data),         // Write Data
         .A_readdat1(readdat1_internal),
         .B_readdat2(readdat2_internal)
+        //debug regs
+      //  .dbg_r0(dbg_r0),
+      //  .dbg_r1(dbg_r1),
+      //  .dbg_r2(dbg_r2),
+      //  .dbg_r3(dbg_r3),
+      //  .dbg_r8(dbg_r8),
+       // .dbg_r9(dbg_r9),
+       // .dbg_r10(dbg_r10)
     );
 
     // Main control unit (uses opcode [31:26])
@@ -55,6 +67,7 @@ module decode(
     ); 
 
     // ID/EX pipeline latch
+    
     idExLatch iEL0(
         // inputs
         .clk(clk),
@@ -68,6 +81,7 @@ module decode(
         .sign_ext(sign_ext_internal),
         .instr_bits_20_16(if_id_instr[20:16]),
         .instr_bits_15_11(if_id_instr[15:11]),
+        .instr_funct     (if_id_instr[5:0]), 
         // outputs
         .wb_out(id_ex_wb),
         .mem_out(id_ex_mem),
@@ -77,7 +91,8 @@ module decode(
         .readdat2_out(id_ex_readdat2),
         .sign_ext_out(id_ex_sign_ext),
         .instr_bits_20_16_out(id_ex_instr_bits_20_16),
-        .instr_bits_15_11_out(id_ex_instr_bits_15_11)
+        .instr_bits_15_11_out(id_ex_instr_bits_15_11),
+        .instr_funct_out      (id_ex_instr_funct)  
     );
 
 endmodule
